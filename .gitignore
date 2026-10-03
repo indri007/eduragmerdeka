@@ -1,4 +1,55 @@
-# Python & Environment
+# =============================================================================
+# EduRAG Merdeka — .gitignore
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# 1. API Keys, Tokens, Credentials, and Secrets (STRICTLY PRIVATE)
+# -----------------------------------------------------------------------------
+.env
+.env.*
+*.env
+*.env.*
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+!.env.example
+
+# Streamlit secrets (local)
+.streamlit/secrets.toml
+secrets.toml
+
+# Cryptographic Keys & Certificates
+*.key
+*.pem
+*.pub
+*.cert
+*.crt
+*.pfx
+*.p12
+*.der
+id_rsa
+id_rsa*
+id_ed25519
+id_ed25519*
+
+# API Tokens & Cloud Credentials
+*token*.txt
+*token*.json
+!special_tokens_map.json
+!added_tokens.json
+credentials.json
+client_secret*.json
+service-account*.json
+service_account*.json
+gcp-credentials*.json
+firebase-adminsdk*.json
+*secret*
+!docs/PRD_EduRAG_Merdeka.md
+
+# -----------------------------------------------------------------------------
+# 2. Python & Environment
+# -----------------------------------------------------------------------------
 __pycache__/
 *.py[cod]
 *$py.class
@@ -8,16 +59,34 @@ env/
 venv/
 .venv/
 ENV/
-*.env
-.env.local
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
 
-# Databases & Vector Stores
+# -----------------------------------------------------------------------------
+# 3. Databases & Vector Stores
+# -----------------------------------------------------------------------------
 *.sqlite
+*.sqlite3
 *.db
 qdrant_storage/
 .chroma/
 
-# Large Model Weights, Binaries, and Archives
+# -----------------------------------------------------------------------------
+# 4. Large Model Weights, Binaries, and Archives
+# -----------------------------------------------------------------------------
 *.safetensors
 *.bin
 *.pt
@@ -25,19 +94,36 @@ qdrant_storage/
 *.onnx
 *.zip
 *.tar.gz
+*.tar
+*.gz
+*.7z
+*.rar
 *.mp3
 *.mp4
+*.wav
 
-# OS & IDE
+# -----------------------------------------------------------------------------
+# 5. OS & IDE Specific Files
+# -----------------------------------------------------------------------------
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
 .vscode/
 .idea/
+*.swp
+*.swo
+*~
 
-# Raw Curriculum Data & Downloads
+# -----------------------------------------------------------------------------
+# 6. Raw Curriculum Data & Cloned Sub-repositories
+# -----------------------------------------------------------------------------
 data_kurikulum/
 /data_kurikulum/
 
-# Cloned Reference Repositories & Large Datasets
 /HomER/
 /Home-Assistant-Requests-V2/
 /Home-FunctionGemma-270m/
