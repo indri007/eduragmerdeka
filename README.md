@@ -52,6 +52,27 @@ eduragmerdeka/
 
 ---
 
+## 🌐 Landing Page (GitHub Pages)
+
+Landing page proyek ini dibangun dengan standar **Material Design 3 (Material You)**, aksesibilitas **WCAG 2.2 AA**, dan performa tinggi (zero-framework, HTML/CSS/JS statis murni).
+
+* **Live URL**: [https://indri007.github.io/eduragmerdeka/](https://indri007.github.io/eduragmerdeka/)
+* **Files**: `index.html`, `styles.css`, `main.js`, `assets/`
+
+### Kustomisasi Warna & Tema
+Seluruh token warna Material 3 didefinisikan sebagai CSS Custom Properties di bagian atas [`styles.css`](styles.css):
+* **Seed Color**: `#4F7A56` (Deep Green)
+* **Secondary**: `#F2C94C` (Pastel Yellow)
+* **Tertiary**: `#6FB8DE` (Pastel Blue)
+
+Untuk mengubah warna tema, cukup ubah nilai variabel CSS `:root` (untuk Light Theme) dan `[data-theme="dark"]` (untuk Dark Theme) di `styles.css`.
+
+### Deployment Otomatis ke GitHub Pages
+Proyek ini menyertakan GitHub Actions workflow di [`.github/workflows/pages.yml`](.github/workflows/pages.yml). Setiap kali perubahan di-push ke branch `main`, landing page akan otomatis ter-build dan terpublikasi ke GitHub Pages.
+
+---
+
 ## 📖 Dokumentasi Lengkap
 Dokumentasi lengkap mengenai arsitektur, ERD, skema database, palet warna, dan aturan sistem dapat dilihat di:  
 👉 [docs/PRD_EduRAG_Merdeka.md](docs/PRD_EduRAG_Merdeka.md)
+

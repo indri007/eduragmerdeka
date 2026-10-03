@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Primary Meta Tags -->
+  <title>EduRAG Merdeka — Asisten Belajar Berbasis Retrieval-Augmented Generation untuk Kurikulum Merdeka</title>
+  <meta name="title" content="EduRAG Merdeka — Asisten Belajar Berbasis Retrieval-Augmented Generation untuk Kurikulum Merdeka">
+  <meta name="description" content="Tanya buku Kurikulum Merdeka Kelas 10, dapat jawaban bersitasi bab & halaman — dan generator soal PG/esai + draft RPP otomatis untuk guru. Bebas halusinasi dengan ambang batas kemiripan > 0.7.">
+  <meta name="keywords" content="EduRAG Merdeka, Kurikulum Merdeka, RAG, AI Pendidikan, Tanya Jawab Buku Siswa, Generator Soal Guru, Qdrant, Cohere, Modul Ajar, Kemendikbud">
+  <meta name="author" content="Indri Kartika & Tim EduRAG Merdeka">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://indri007.github.io/eduragmerdeka/">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://indri007.github.io/eduragmerdeka/">
+  <meta property="og:title" content="EduRAG Merdeka — Asisten Belajar Berbasis RAG untuk Kurikulum Merdeka">
+  <meta property="og:description" content="Tanya buku Kurikulum Merdeka, dapat jawaban bersitasi — dan soal + RPP otomatis untuk guru.">
+  <meta property="og:image" content="assets/og-image.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:locale" content="id_ID">
+
+  <!-- Twitter -->
+  <meta property="twitter:card" content="summary_large_image">
+  <meta property="twitter:url" content="https://indri007.github.io/eduragmerdeka/">
+  <meta property="twitter:title" content="EduRAG Merdeka — Asisten Belajar Berbasis RAG untuk Kurikulum Merdeka">
+  <meta property="twitter:description" content="Tanya buku Kurikulum Merdeka, dapat jawaban bersitasi — dan soal + RPP otomatis untuk guru.">
+  <meta property="twitter:image" content="assets/og-image.jpg">
+
+  <!-- Favicons -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%234F7A56'><path d='M12 3L1 9l11 6 9-4.91V17h2V9L12 3z M5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82z'/></svg>">
+  <meta name="theme-color" content="#4F7A56">
+
+  <!-- Google Fonts: Plus Jakarta Sans (Display/Heading) & Inter (Body) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <!-- Material Symbols Rounded -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0">
+
+  <!-- Material Web Components (ESM via CDN) -->
+  <script type="importmap">
+    {
+      "imports": {
+        "@material/web/": "https://esm.run/@material/web/"
+      }
+    }
+  </script>
+  <script type="module">
+    import '@material/web/all.js';
+    import {styles as typescaleStyles} from '@material/web/typography/md-typescale-styles.js';
+    document.adoptedStyleSheets.push(typescaleStyles.styleSheet);
+  </script>
+
+  <!-- Custom Stylesheet -->
+  <link rel="stylesheet" href="styles.css">
+
+  <!-- Structured Data: JSON-LD SoftwareApplication -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "EduRAG Merdeka",
+    "operatingSystem": "All (Web App)",
+    "applicationCategory": "EducationalApplication",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "IDR"
+    },
+    "description": "Asisten Belajar Berbasis Retrieval-Augmented Generation untuk Kurikulum Merdeka Kelas 10. Tanya buku resmi dengan sitasi bab & halaman, serta generator soal dan RPP otomatis untuk guru.",
+    "url": "https://indri007.github.io/eduragmerdeka/",
+    "author": {
+      "@type": "Person",
+      "name": "Indri Kartika"
+    }
+  }
+  </script>
+</head>
+
+<body>
+  <!-- Accessibility Skip Link -->
+  <a href="#main-content" class="skip-link">Lewati ke Konten Utama</a>
+
+  <!-- 1. Top App Bar -->
+  <header class="top-app-bar" id="app-bar" role="banner">
+    <div class="container">
+      <a href="#" class="brand-logo" aria-label="EduRAG Merdeka Beranda">
+        <div class="brand-icon-wrapper">
+          <span class="material-symbols-rounded">school</span>
+        </div>
+        <div class="brand-name">
+          <span>EduRAG</span>
+          <span style="color: var(--md-sys-color-primary);">Merdeka</span>
+          <span class="brand-badge">v1.0</span>
+        </div>
+      </a>
+
+      <nav aria-label="Navigasi Utama">
+        <ul class="nav-links">
+          <li><a href="#fitur">Fitur Utama</a></li>
+          <li><a href="#cara-kerja">Cara Kerja</a></li>
+          <li><a href="#mode-peran">Siswa & Guru</a></li>
+          <li><a href="#demo-langsung">Simulasi Demo</a></li>
+          <li><a href="#quickstart">Quick Start</a></li>
+          <li><a href="#faq">FAQ</a></li>
+        </ul>
+      </nav>
+
+      <div class="nav-actions">
+        <!-- Live GitHub Star Badge -->
+        <a href="https://github.com/indri007/eduragmerdeka" target="_blank" rel="noopener noreferrer" class="github-star-btn" aria-label="Bintang di GitHub">
+          <span class="material-symbols-rounded" style="font-size: 18px; color: #E3A008;">star</span>
+          <span>Star</span>
+          <span class="star-count" id="repo-stars">12</span>
+        </a>
+
+        <!-- Dark/Light Theme Toggle -->
+        <button id="theme-toggle" class="theme-toggle-btn" aria-label="Ganti mode gelap/terang" title="Ganti Tema">
+          <span class="material-symbols-rounded" id="theme-icon">dark_mode</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Landmark -->
+  <main id="main-content">
+    
+    <!-- 2. HERO Section -->
+    <section class="hero-section" aria-labelledby="hero-title">
+      <div class="hero-blob"></div>
+      <div class="container">
+        <div class="hero-grid">
+          
+          <div class="hero-content">
+            <div class="hero-badge-row">
+              <span class="badge-pill">
+                <span class="badge-pulse"></span>
+                Kurikulum Merdeka Kelas 10
+              </span>
+              <span class="badge-pill" style="background: var(--md-sys-color-secondary-container); color: var(--md-sys-color-on-secondary-container); border-color: transparent;">
+                ⚡ Anti-Halusinasi
+              </span>
+            </div>
+
+            <h1 id="hero-title" class="hero-headline">
+              Tanya Buku Kurikulum Merdeka, Jawaban <span class="highlight">Pasti Bersitasi.</span>
+            </h1>
+
+            <p class="hero-subhead">
+              <strong>EduRAG Merdeka</strong> mengubah Buku Siswa & Buku Guru resmi menjadi asisten tanya-jawab kontekstual untuk siswa, serta generator paket soal latihan dan draft RPP instan untuk guru.
+            </p>
+
+            <div class="hero-cta-group">
+              <a href="#demo-langsung" class="btn-m3-primary">
+                <span class="material-symbols-rounded">play_arrow</span>
+                <span>Coba Demo Interaktif</span>
+              </a>
+              <a href="https://github.com/indri007/eduragmerdeka" target="_blank" rel="noopener noreferrer" class="btn-m3-tonal">
+                <span class="material-symbols-rounded">code</span>
+                <span>Lihat di GitHub</span>
+              </a>
+            </div>
+
+            <div class="trust-row">
+              <div class="trust-item">
+                <span class="material-symbols-rounded" style="font-size: 16px; color: var(--md-sys-color-primary);">verified_user</span>
+                <span>Lisensi Apache 2.0</span>
+              </div>
+              <div class="trust-item">
+                <span class="material-symbols-rounded" style="font-size: 16px; color: var(--md-sys-color-secondary);">trophy</span>
+                <span>Hackathon 2026 Ready</span>
+              </div>
+              <div class="trust-item">
+                <span class="material-symbols-rounded" style="font-size: 16px; color: var(--md-sys-color-tertiary);">local_library</span>
+                <span>Materi Resmi Kemendikbud</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Hero Realistic UI Mockup (~55% width) -->
+          <div class="hero-visual">
+            <div class="mockup-wrapper">
+              <picture>
+                <source srcset="assets/hero-mockup.jpg" type="image/jpeg">
+                <img src="assets/hero-mockup.jpg" alt="EduRAG Merdeka Interface Preview di Laptop dan Smartphone" class="mockup-image" width="1280" height="720" fetchpriority="high">
+              </picture>
+              
+              <!-- Floating Citation Badge -->
+              <div class="floating-badge">
+                <span class="material-symbols-rounded" style="color: var(--md-sys-color-tertiary);">menu_book</span>
+                <span>Eksponen & Bentuk Akar</span>
+                <span class="citation-tag">Bab 3, hal. 45</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. Logo/Stack Strip -->
+    <section class="stack-strip" aria-label="Teknologi dan Infrastruktur">
+      <div class="container">
+        <p class="stack-label">Ditenagai oleh Ekosistem Open Source Modern</p>
+        <div class="stack-logos">
+          <div class="stack-item"><span class="material-symbols-rounded">terminal</span> Python 3.11</div>
+          <div class="stack-item"><span class="material-symbols-rounded">bolt</span> FastAPI</div>
+          <div class="stack-item"><span class="material-symbols-rounded">hub</span> Qdrant Vector DB</div>
+          <div class="stack-item"><span class="material-symbols-rounded">psychology</span> Cohere / BGE-M3</div>
+          <div class="stack-item"><span class="material-symbols-rounded">database</span> MySQL (Aiven)</div>
+          <div class="stack-item"><span class="material-symbols-rounded">account_tree</span> n8n Ingestion</div>
+          <div class="stack-item"><span class="material-symbols-rounded">cloud</span> Google Cloud Run</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. Problem -> Solution: Storytelling & Isu Nyata Kelas -->
+    <section class="problem-solution-section" id="cerita-masalah" aria-labelledby="problem-solution-heading">
+      <div class="container">
+        <div class="section-header">
+          <p class="section-tag">Kisah Nyata di Balik EduRAG</p>
+          <h2 id="problem-solution-heading" class="section-title">Ketika Buku 300 Halaman Bertemu Ujian Besok Pagi</h2>
+          <p class="section-subtitle">Potret nyata di ruang kelas: siswa kelelahan mencari materi, guru kehabisan waktu menyusun administrasi.</p>
+        </div>
+
+        <!-- Storytelling Cards Grid -->
+        <div class="storytelling-grid">
+          
+          <!-- Story 1: PDF Tebal vs Siswa -->
+          <div class="story-card">
+            <div class="story-header">
+              <div class="story-icon problem">
+                <span class="material-symbols-rounded">menu_book</span>
+              </div>
+              <div>
+                <span class="story-tag problem">Isu #1 • Dilema Siswa</span>
+                <h3 class="story-title">Tersesat di PDF 340 Halaman</h3>
+              </div>
+            </div>
+            <p class="story-quote">
+              "Besok ada ulangan Matematika bab Eksponen. Buka PDF di HP, layarnya kecil dan harus scroll puluhan halaman bolak-balik cuma buat nemu satu rumus dan contoh soal. Akhirnya malah ketiduran karena capek."
+            </p>
+            <div class="story-divider"></div>
+            <div class="story-solution">
+              <div class="solution-badge">
+                <span class="material-symbols-rounded" style="font-size: 16px;">bolt</span>
+                <span>Solusi EduRAG Merdeka</span>
+              </div>
+              <p class="solution-text">
+                <strong>Tanya instan layaknya chat ke teman:</strong> EduRAG langsung mengambil paragraf inti dari buku resmi lengkap dengan rujukan <em>Bab & Nomor Halaman</em> dalam 2 detik. Siswa bisa langsung verifikasi ke buku cetak tanpa ragu.
+              </p>
+            </div>
+          </div>
+
+          <!-- Story 2: Bahaya Halusinasi AI -->
+          <div class="story-card">
+            <div class="story-header">
+              <div class="story-icon problem">
+                <span class="material-symbols-rounded">warning_amber</span>
+              </div>
+              <div>
+                <span class="story-tag problem">Isu #2 • Jebakan AI Generatif</span>
+                <h3 class="story-title">Jawaban AI Meyakinkan, Tapi Salah Rumus</h3>
+              </div>
+            </div>
+            <p class="story-quote">
+              "Banyak siswa pakai ChatGPT umum buat tanya PR Fisika/Kimia. Bahasanya rapi dan meyakinkan, tapi ternyata rumusnya ngarang atau pakai kurikulum luar negeri. Pas ujian nilainya anjlok karena miskonsepsi fatal."
+            </p>
+            <div class="story-divider"></div>
+            <div class="story-solution">
+              <div class="solution-badge">
+                <span class="material-symbols-rounded" style="font-size: 16px;">shield_locked</span>
+                <span>Solusi EduRAG Merdeka</span>
+              </div>
+              <p class="solution-text">
+                <strong>Guardrail Anti-Halusinasi (Similarity &gt; 0.70):</strong> AI dilarang mengarang bebas. Jika materi tidak ada di Buku Siswa/Guru Kemendikbud, sistem dengan jujur merespons <em>"Materi tidak ditemukan di buku"</em>.
+              </p>
+            </div>
+          </div>
+
+          <!-- Story 3: Waktu Guru Habis untuk RPP -->
+          <div class="story-card">
+            <div class="story-header">
+              <div class="story-icon problem">
+                <span class="material-symbols-rounded">bedtime</span>
+              </div>
+              <div>
+                <span class="story-tag problem">Isu #3 • Beban Administratif Guru</span>
+                <h3 class="story-title">Begadang Jam 1 Dini Hari Menyusun RPP</h3>
+              </div>
+            </div>
+            <p class="story-quote">
+              "Pak Budi dan Bu Siti mengajar 4 kelas besok pagi. Tapi malam ini masih terjaga menyelaraskan Capaian Pembelajaran (CP), membuat Alur Tujuan (ATP), dan menyusun Modul Ajar Deep Learning dari nol secara manual."
+            </p>
+            <div class="story-divider"></div>
+            <div class="story-solution">
+              <div class="solution-badge">
+                <span class="material-symbols-rounded" style="font-size: 16px;">auto_awesome</span>
+                <span>Solusi EduRAG Merdeka</span>
+              </div>
+              <p class="solution-text">
+                <strong>Generator Modul Ajar 1-Klik:</strong> Hasilkan draf RPP 3 komponen resmi (Tujuan Pembelajaran, Kegiatan Belajar Berbasis Inkuiri, dan Rencana Asesmen) sesuai CP bab terkait dalam waktu kurang dari 15 detik.
+              </p>
+            </div>
+          </div>
+
+          <!-- Story 4: Sulitnya Membuat Soal HOTS -->
+          <div class="story-card">
+            <div class="story-header">
+              <div class="story-icon problem">
+                <span class="material-symbols-rounded">psychology</span>
+              </div>
+              <div>
+                <span class="story-tag problem">Isu #4 • Asesmen Kurikulum Merdeka</span>
+                <h3 class="story-title">Membuat Soal HOTS yang Bermakna Itu Rumit</h3>
+              </div>
+            </div>
+            <p class="story-quote">
+              "Kurikulum Merdeka menuntut soal bernalar kritis (HOTS), bukan hafalan semata. Membuat 5 soal pilihan ganda dengan pilihan pengecoh (distraktor) yang masuk akal ditambah rubrik esai butuh waktu berjam-jam."
+            </p>
+            <div class="story-divider"></div>
+            <div class="story-solution">
+              <div class="solution-badge">
+                <span class="material-symbols-rounded" style="font-size: 16px;">quiz</span>
+                <span>Solusi EduRAG Merdeka</span>
+              </div>
+              <p class="solution-text">
+                <strong>Generator Paket Soal Standar Ujian:</strong> Otomatis menghasilkan 5 Soal Pilihan Ganda (A–D + kunci + pembahasan tuntas) dan 2 Soal Esai kontekstual langsung dari bab buku pilihan guru.
+              </p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. Features Bento Grid (6 cards, mixed sizes) -->
+    <section class="features-section" id="fitur" aria-labelledby="features-heading">
+      <div class="container">
+        <div class="section-header">
+          <p class="section-tag">Arsitektur Fitur</p>
+          <h2 id="features-heading" class="section-title">Dirancang untuk Presisi Pendidikan</h2>
+          <p class="section-subtitle">Dukungan komprehensif mulai dari pemahaman materi belajar hingga otomatisasi administratif tenaga pendidik.</p>
+        </div>
+
+        <div class="bento-grid">
+          <!-- Card 1: Anti-Hallucination Guardrail (Span 2) -->
+          <div class="bento-card span-2">
+            <div class="bento-icon">
+              <span class="material-symbols-rounded">shield_locked</span>
+            </div>
+            <h3 class="bento-title">Guardrail Anti-Halusinasi (Similarity &gt; 0.70)</h3>
+            <p class="bento-desc">
+              AI tidak diperbolehkan berimprovisasi di luar buku. Jika skor kemiripan semantik di bawah ambang batas 0.7, sistem langsung merespons secara ramah bahwa materi tidak ditemukan tanpa memanggil model generatif.
+            </p>
+            
+            <!-- Embedded Mini Demo Animation -->
+            <div class="mini-demo-box">
+              <div class="mini-chat-bubble user">
+                "Siapa pemenang piala dunia 2030?"
+              </div>
+              <div class="mini-chat-bubble ai">
+                <span style="font-weight: 600; color: var(--md-sys-color-outline);">🛡️ Sistem Guardrail:</span><br>
+                Materi tidak ditemukan di buku Kurikulum Merdeka Kelas 10, coba kata kunci lain terkait pelajaran.
+                <div class="mini-badge">Similarity: 0.28 (&lt; 0.70 Threshold)</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 2: Mode Siswa Chat -->
+          <div class="bento-card">
+            <div class="bento-icon tertiary">
+              <span class="material-symbols-rounded">chat</span>
+            </div>
+            <h3 class="bento-title">Mode Siswa Interaktif</h3>
+            <p class="bento-desc">
+              Tanya rumus, kaidah kebahasaan, atau konsep biologi/fisika dengan bahasa percakapan sehari-hari.
+            </p>
+          </div>
+
+          <!-- Card 3: Generator Soal 5 PG + 2 Esai -->
+          <div class="bento-card">
+            <div class="bento-icon secondary">
+              <span class="material-symbols-rounded">quiz</span>
+            </div>
+            <h3 class="bento-title">Paket Soal HOTS Otomatis</h3>
+            <p class="bento-desc">
+              Otomatis menghasilkan 5 soal Pilihan Ganda (A–D + kunci + pembahasan) dan 2 soal esai berstandar Capaian Pembelajaran.
+            </p>
+          </div>
+
+          <!-- Card 4: Penyusun Modul Ajar (RPP) -->
+          <div class="bento-card">
+            <div class="bento-icon">
+              <span class="material-symbols-rounded">assignment</span>
+            </div>
+            <h3 class="bento-title">Draf Modul Ajar 3 Komponen</h3>
+            <p class="bento-desc">
+              Menyusun otomatis Tujuan Pembelajaran, Rencana Kegiatan Belajar (Inkuiri/Deep Learning), dan Rubrik Asesmen Sumatif.
+            </p>
+          </div>
+
+          <!-- Card 5: Ekosistem Vector Qdrant & Cohere (Span 2) -->
+          <div class="bento-card span-2">
+            <div class="bento-icon tertiary">
+              <span class="material-symbols-rounded">database</span>
+            </div>
+            <h3 class="bento-title">Infrastruktur Qdrant Vector Collection</h3>
+            <p class="bento-desc">
+              Setiap buku dipecah menjadi chunk 500–800 token berorientasi sub-bab dengan HNSW index dan payload filter multi-mapel untuk kecepatan retrieval di bawah 100ms.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6. How it Works (Horizontal Stepper) -->
+    <section class="how-it-works-section" id="cara-kerja" aria-labelledby="hiw-heading">
+      <div class="container">
+        <div class="section-header">
+          <p class="section-tag">Alur Sistem</p>
+          <h2 id="hiw-heading" class="section-title">Bagaimana Data Mengalir di EduRAG</h2>
+          <p class="section-subtitle">Dari halaman buku cetak Kemendikbud hingga menjadi jawaban bersitasi di layar Anda.</p>
+        </div>
+
+        <div class="stepper-container">
+          <div class="step-card">
+            <div class="step-number">1</div>
+            <h3 class="step-title">Buku PDF Resmi</h3>
+            <p class="step-desc">Buku Siswa & Guru Kelas 10 (Matematika, IPA, B. Indonesia, B. Inggris).</p>
+          </div>
+
+          <div class="step-card">
+            <div class="step-number">2</div>
+            <h3 class="step-title">Parsing & Chunking</h3>
+            <p class="step-desc">Docling & n8n mengekstrak teks, tabel, dan metadata bab per 500–800 token.</p>
+          </div>
+
+          <div class="step-card">
+            <div class="step-number">3</div>
+            <h3 class="step-title">Vector Indexing</h3>
+            <p class="step-desc">Embedding dense disimpan ke Qdrant Vector DB dengan HNSW index.</p>
+          </div>
+
+          <div class="step-card">
+            <div class="step-number">4</div>
+            <h3 class="step-title">Retrieval Top-k</h3>
+            <p class="step-desc">Pencarian 3–5 chunk paling relevan & verifikasi ambang kemiripan &gt; 0.70.</p>
+          </div>
+
+          <div class="step-card">
+            <div class="step-number">5</div>
+            <h3 class="step-title">LLM Synthesis</h3>
+            <p class="step-desc">Model menyusun jawaban murni hanya dari konteks buku yang ditemukan.</p>
+          </div>
+
+          <div class="step-card">
+            <div class="step-number">6</div>
+            <h3 class="step-title">Jawaban + Sitasi</h3>
+            <p class="step-desc">Output ditampilkan lengkap dengan rujukan bab dan nomor halaman buku cetak.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 7. Mode Siswa vs Mode Guru (Segmented Switcher) -->
+    <section class="mode-toggle-section" id="mode-peran" aria-labelledby="modes-heading">
+      <div class="container">
+        <div class="section-header">
+          <p class="section-tag">Dua Pengalaman Terpadu</p>
+          <h2 id="modes-heading" class="section-title">Mode Siswa vs Mode Guru</h2>
+          <p class="section-subtitle">Satu klik untuk mengubah tampilan dan fungsionalitas sesuai peran pengguna.</p>
+        </div>
+
+        <!-- Segmented Control Button -->
+        <div class="segmented-control" role="tablist" aria-label="Pilih Mode Pengguna">
+          <button id="btn-mode-siswa" class="segment-btn active" role="tab" aria-selected="true" aria-controls="view-siswa">
+            👨‍🎓 Mode Siswa
+          </button>
+          <button id="btn-mode-guru" class="segment-btn" role="tab" aria-selected="false" aria-controls="view-guru">
+            👩‍🏫 Mode Guru
+          </button>
+        </div>
+
+        <!-- View: Siswa -->
+        <div id="view-siswa" class="mode-view active" role="tabpanel" aria-labelledby="btn-mode-siswa">
+          <div class="mode-card-frame">
+            <div>
+              <span class="badge-pill" style="margin-bottom: 16px;">Tanya Jawab Bersitasi</span>
+              <h3 style="font-size: 1.75rem; margin-bottom: 14px;">Belajar Mandiri Tanpa Bingung Sumber Asli</h3>
+              <p style="color: var(--md-sys-color-on-surface-variant); font-size: 1rem; margin-bottom: 20px;">
+                Siswa cukup mengetikkan pertanyaan materi apapun. Jawaban akan langsung dirujuk ke nomor halaman buku cetak yang mereka miliki di kelas, memudahkan belajar kelompok maupun persiapan ujian.
+              </p>
+              <ul class="comparison-list">
+                <li><span class="material-symbols-rounded" style="color: var(--md-sys-color-primary);">check</span> Tersedia untuk 4 mata pelajaran wajib Kelas 10.</li>
+                <li><span class="material-symbols-rounded" style="color: var(--md-sys-color-primary);">check</span> Transparansi rujukan halaman untuk cek silang manual.</li>
+                <li><span class="material-symbols-rounded" style="color: var(--md-sys-color-primary);">check</span> Aman dari materi tidak senonoh atau di luar kurikulum.</li>
+              </ul>
+            </div>
+            <div class="mode-preview-screen">
+              <div style="font-size: 0.8125rem; font-weight: 700; color: var(--md-sys-color-primary); margin-bottom: 8px;">TAMPILAN SISWA</div>
+              <div class="mini-chat-bubble user">"Bagaimana sifat pangkat negatif pada bilangan berpangkat bulat?"</div>
+              <div class="mini-chat-bubble ai">
+                Untuk setiap a bilangan real bukan nol dan n bilangan bulat positif, berlaku: <strong>a⁻ⁿ = 1 / aⁿ</strong>.
+                <div style="margin-top: 10px; padding-top: 8px; border-top: 1px dashed var(--md-sys-color-outline-variant); font-size: 0.75rem; color: var(--md-sys-color-tertiary); font-weight: 600;">
+                  📖 Sitasi: Matematika Kelas 10 • Bab 1 Eksponen • Halaman 8
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- View: Guru -->
+        <div id="view-guru" class="mode-view" role="tabpanel" aria-labelledby="btn-mode-guru">
+          <div class="mode-card-frame">
+            <div>
+              <span class="badge-pill" style="margin-bottom: 16px; background: var(--md-sys-color-secondary-container); color: var(--md-sys-color-on-secondary-container);">Generator Soal & RPP</span>
+              <h3 style="font-size: 1.75rem; margin-bottom: 14px;">Administrasi Cepat, Fokus Mengajar Lebih Banyak</h3>
+              <p style="color: var(--md-sys-color-on-surface-variant); font-size: 1rem; margin-bottom: 20px;">
+                Guru dapat memilih bab atau Capaian Pembelajaran tertentu, lalu mengklik satu tombol untuk menghasilkan bank soal ulangan harian atau draf Modul Ajar lengkap dengan asesmen.
+              </p>
+              <ul class="comparison-list">
+                <li><span class="material-symbols-rounded" style="color: var(--md-sys-color-secondary);">check</span> 5 Soal Pilihan Ganda lengkap dengan opsi distraktor cerdas & pembahasan.</li>
+                <li><span class="material-symbols-rounded" style="color: var(--md-sys-color-secondary);">check</span> 2 Soal Esai HOTS (Higher Order Thinking Skills) dengan rubrik nilai.</li>
+                <li><span class="material-symbols-rounded" style="color: var(--md-sys-color-secondary);">check</span> Draf RPP terstruktur: Pendahuluan, Inti, Penutup, dan Asesmen.</li>
+              </ul>
+            </div>
+            <div class="mode-preview-screen">
+              <div style="font-size: 0.8125rem; font-weight: 700; color: var(--md-sys-color-secondary); margin-bottom: 8px;">TAMPILAN GURU</div>
+              <div style="background: var(--md-sys-color-surface-container-lowest); padding: 12px; border-radius: 8px; border: 1px solid var(--md-sys-color-outline-variant);">
+                <div style="font-weight: 700; font-size: 0.875rem;">Paket Soal: Bab 2 Vektor dan Operasinya</div>
+                <div style="font-size: 0.75rem; color: var(--md-sys-color-on-surface-variant); margin-top: 4px;">Status: 5 PG + 2 Esai ter-generate • Terverifikasi Capaian Pembelajaran</div>
+                <div style="margin-top: 10px; display: flex; gap: 8px;">
+                  <span style="font-size: 0.6875rem; background: var(--md-sys-color-primary-container); padding: 2px 6px; border-radius: 4px;">Kunci Jawaban: Ada</span>
+                  <span style="font-size: 0.6875rem; background: var(--md-sys-color-tertiary-container); padding: 2px 6px; border-radius: 4px;">Ekspor Word / MD</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- 8. Live Interactive Simulation -->
+    <section class="demo-section" id="demo-langsung" aria-labelledby="demo-heading">
+      <div class="container">
+        <div class="section-header">
+          <p class="section-tag">Uji Coba Langsung</p>
+          <h2 id="demo-heading" class="section-title">Coba Simulasi EduRAG Sekarang</h2>
+          <p class="section-subtitle">Pilih contoh pertanyaan kurikulum atau uji jebakan anti-halusinasi kami.</p>
+        </div>
+
+        <div class="interactive-demo-frame">
+          <div class="demo-top-bar">
+            <div style="display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 0.875rem;">
+              <span class="material-symbols-rounded" style="color: var(--md-sys-color-primary); font-size: 20px;">smart_toy</span>
+              <span>EduRAG Sandbox Playground</span>
+            </div>
+            <div class="demo-chips">
+              <button class="demo-chip active" data-query="Apa perbedaan eksponen dan logaritma?">Matematika</button>
+              <button class="demo-chip" data-query="Apa struktur teks laporan hasil observasi?">B. Indonesia</button>
+              <button class="demo-chip" data-query="Bagaimana proses terjadinya pemanasan global?">IPA Terpadu</button>
+              <button class="demo-chip" data-query="Siapa juara piala dunia sepak bola 2030?" style="color: var(--md-sys-color-error); border-color: var(--md-sys-color-error-container);">Uji Jebakan ⚠️</button>
+            </div>
+          </div>
+
+          <div class="demo-chat-body" id="demo-chat-container">
+            <div class="mini-chat-bubble ai" style="max-width: 80%;">
+              <strong>Halo! Saya EduRAG Merdeka.</strong><br>
+              Silakan ketik pertanyaan seputar buku Kurikulum Merdeka Kelas 10, atau klik salah satu topik di atas untuk melihat bagaimana sitasi dan guardrail anti-halusinasi bekerja!
+            </div>
+          </div>
+
+          <form id="demo-form" class="demo-input-bar">
+            <input type="text" id="demo-input-field" class="demo-input" placeholder="Ketik pertanyaan materi di sini (contoh: Apa itu vektor satuan?)..." required>
+            <button type="submit" class="demo-send-btn" aria-label="Kirim Pertanyaan">
+              <span class="material-symbols-rounded" style="font-size: 20px;">send</span>
+            </button>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- 9. Quick Start (Terminal Block) -->
+    <section class="quickstart-section" id="quickstart" aria-labelledby="quickstart-heading">
+      <div class="container">
+        <div class="section-header">
+          <p class="section-tag">Bagi Pengembang & Kontributor</p>
+          <h2 id="quickstart-heading" class="section-title">Jalankan Secara Lokal dalam 3 Langkah</h2>
+          <p class="section-subtitle">Proyek ini 100% open-source dan siap di-deploy ke lingkungan lokal maupun cloud container.</p>
+        </div>
+
+        <div class="terminal-card">
+          <div class="terminal-header">
+            <div class="terminal-dots">
+              <div class="terminal-dot dot-red"></div>
+              <div class="terminal-dot dot-yellow"></div>
+              <div class="terminal-dot dot-green"></div>
+            </div>
+            <div style="font-size: 0.75rem; color: #8F9E8D;">bash / zsh terminal</div>
+            <button id="copy-quickstart" class="copy-code-btn" aria-label="Salin Perintah Terminal">
+              <span class="material-symbols-rounded" style="font-size: 14px;">content_copy</span>
+              <span id="copy-btn-text">Salin</span>
+            </button>
+          </div>
+          <div class="terminal-body">
+            <p class="comment"># 1. Clone repositori EduRAG Merdeka</p>
+            <p class="cmd">git clone https://github.com/indri007/eduragmerdeka.git</p>
+            <p class="cmd">cd eduragmerdeka</p>
+            <br>
+            <p class="comment"># 2. Pasang dependensi Python</p>
+            <p class="cmd">python3 -m venv venv && source venv/bin/activate</p>
+            <p class="cmd">pip install -r requirements.txt</p>
+            <br>
+            <p class="comment"># 3. Jalankan aplikasi Streamlit lokal</p>
+            <p class="cmd">streamlit run app.py</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 10. Roadmap Timeline & Contributors -->
+    <section class="roadmap-section" id="roadmap" aria-labelledby="roadmap-heading">
+      <div class="container">
+        <div class="section-header">
+          <p class="section-tag">Rencana Pengembangan</p>
+          <h2 id="roadmap-heading" class="section-title">Roadmap EduRAG 2026</h2>
+          <p class="section-subtitle">Tahapan strategis ekspansi fitur dari prototype hackathon menuju ekosistem sekolah digital.</p>
+        </div>
+
+        <div class="roadmap-grid">
+          <div class="roadmap-card active">
+            <span class="quarter-tag">Q1 2026 • SELESAI</span>
+            <h3 style="font-size: 1.15rem; margin-bottom: 8px;">MVP & Evaluasi Akurasi</h3>
+            <p style="font-size: 0.875rem; color: var(--md-sys-color-on-surface-variant);">
+              RAG untuk 4 mapel Kelas 10, sitasi nomor halaman, generator 5 PG + 2 Esai, dan benchmark IDK-MRC.
+            </p>
+          </div>
+
+          <div class="roadmap-card">
+            <span class="quarter-tag" style="background: var(--md-sys-color-surface-container-high); color: var(--md-sys-color-on-surface);">Q2 2026</span>
+            <h3 style="font-size: 1.15rem; margin-bottom: 8px;">Ekspansi Kelas 11 & 12</h3>
+            <p style="font-size: 0.875rem; color: var(--md-sys-color-on-surface-variant);">
+              Mencakup seluruh jenjang SMA/SMK Fase F serta integrasi embedding dwibahasa lokal Sahabat-AI.
+            </p>
+          </div>
+
+          <div class="roadmap-card">
+            <span class="quarter-tag" style="background: var(--md-sys-color-surface-container-high); color: var(--md-sys-color-on-surface);">Q3 2026</span>
+            <h3 style="font-size: 1.15rem; margin-bottom: 8px;">Audio & Voice RAG</h3>
+            <p style="font-size: 0.875rem; color: var(--md-sys-color-on-surface-variant);">
+              Tanya jawab suara dengan integrasi Whisper & TTS bahasa Indonesia untuk aksesibilitas siswa tunanetra.
+            </p>
+          </div>
+
+          <div class="roadmap-card">
+            <span class="quarter-tag" style="background: var(--md-sys-color-surface-container-high); color: var(--md-sys-color-on-surface);">Q4 2026</span>
+            <h3 style="font-size: 1.15rem; margin-bottom: 8px;">Integrasi Google Classroom</h3>
+            <p style="font-size: 0.875rem; color: var(--md-sys-color-on-surface-variant);">
+              Ekspor langsung soal dan modul ajar ke LMS sekolah serta penilaian otomatis berbasis AI judge.
+            </p>
+          </div>
+        </div>
+
+        <!-- Contributors Section -->
+        <div style="margin-top: 48px; text-align: center;">
+          <h3 style="font-size: 1.25rem; margin-bottom: 16px;">Kontributor & Pengembang</h3>
+          <div id="contributors-container" style="display: flex; justify-content: center; align-items: center; gap: 16px; flex-wrap: wrap;">
+            <!-- Loaded dynamically via JavaScript with fallback -->
+            <a href="https://github.com/indri007" target="_blank" rel="noopener noreferrer" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 8px; background: var(--md-sys-color-surface-container-high); padding: 6px 14px; border-radius: var(--md-sys-shape-corner-full);">
+              <img src="https://avatars.githubusercontent.com/u/235472268?v=4" alt="Indri Kartika" style="width: 28px; height: 28px; border-radius: 50%;">
+              <span style="font-weight: 600; font-size: 0.875rem;">Indri Kartika (Lead)</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 11. FAQ Accordion -->
+    <section class="faq-section" id="faq" aria-labelledby="faq-heading">
+      <div class="container">
+        <div class="section-header">
+          <p class="section-tag">Tanya Jawab</p>
+          <h2 id="faq-heading" class="section-title">Pertanyaan yang Sering Diajukan</h2>
+          <p class="section-subtitle">Penjelasan lengkap mengenai reliabilitas, hak cipta materi, dan implementasi teknis.</p>
+        </div>
+
+        <div class="faq-list">
+          <div class="faq-item">
+            <button class="faq-question">
+              <span>Bagaimana EduRAG Merdeka menjamin jawaban tidak berhalusinasi?</span>
+              <span class="material-symbols-rounded faq-icon">expand_more</span>
+            </button>
+            <div class="faq-answer">
+              EduRAG menerapkan proteksi ganda: (1) Ambang batas Cosine Similarity &gt; 0.70 pada Qdrant. Jika tidak ada konteks relevan yang melewati angka tersebut, sistem langsung menghentikan proses tanpa memanggil LLM. (2) Prompt engineering ketat yang mewajibkan LLM hanya menyintesis fakta dari teks yang di-retrieve beserta sitasi halamannya.
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <button class="faq-question">
+              <span>Dari mana sumber buku teks yang diindeks?</span>
+              <span class="material-symbols-rounded faq-icon">expand_more</span>
+            </button>
+            <div class="faq-answer">
+              Sumber berasal dari Buku Siswa (BS) dan Buku Panduan Guru (BG) resmi terbitan Kementerian Pendidikan, Kebudayaan, Riset, dan Teknologi (Kemendikbudristek) Republik Indonesia untuk Kurikulum Merdeka Fase E (Kelas 10).
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <button class="faq-question">
+              <span>Apakah platform ini gratis untuk digunakan oleh guru dan siswa?</span>
+              <span class="material-symbols-rounded faq-icon">expand_more</span>
+            </button>
+            <div class="faq-answer">
+              Ya, EduRAG Merdeka adalah proyek open-source berlisensi Apache 2.0. Siapapun dapat mengunduh kode sumber, meng-host sendiri di server sekolah, atau berkontribusi dalam pengembangannya.
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <button class="faq-question">
+              <span>Berapa lama waktu yang dibutuhkan untuk generate paket soal & RPP?</span>
+              <span class="material-symbols-rounded faq-icon">expand_more</span>
+            </button>
+            <div class="faq-answer">
+              Rata-rata pemrosesan paket 5 Pilihan Ganda + 2 Esai atau draf Modul Ajar berlangsung antara 8 hingga 14 detik, jauh di bawah batas target non-functional requirements (15 detik).
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <button class="faq-question">
+              <span>Apa arti nama "EduRAG Merdeka"?</span>
+              <span class="material-symbols-rounded faq-icon">expand_more</span>
+            </button>
+            <div class="faq-answer">
+              <strong>Edu</strong> berarti Education (Pendidikan), <strong>RAG</strong> berarti Retrieval-Augmented Generation (teknik AI yang mencari teks resmi terlebih dahulu sebelum merangkum jawaban), dan <strong>Merdeka</strong> merujuk pada Kurikulum Merdeka yang menjadi basis data resmi aplikasi.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 12. Final CTA Band & Footer -->
+    <section class="container" aria-label="Ajakan Bertindak">
+      <div class="cta-band">
+        <h2 class="cta-title">Siap Memajukan Pendidikan Indonesia?</h2>
+        <p class="cta-subtitle">
+          Coba prototipe EduRAG Merdeka sekarang, berkontribusi di GitHub, atau gunakan di kelas Anda.
+        </p>
+        <div style="display: flex; justify-content: center; gap: 16px; flex-wrap: wrap;">
+          <a href="#demo-langsung" class="btn-m3-primary" style="background-color: var(--md-sys-color-on-primary-container); color: var(--md-sys-color-primary-container);">
+            <span class="material-symbols-rounded">rocket_launch</span>
+            <span>Mulai Sekarang</span>
+          </a>
+          <a href="https://github.com/indri007/eduragmerdeka" target="_blank" rel="noopener noreferrer" class="btn-m3-tonal" style="background: rgba(255,255,255,0.2); color: #FFFFFF; border-color: rgba(255,255,255,0.4);">
+            <span class="material-symbols-rounded">star</span>
+            <span>Beri Bintang di GitHub</span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer" role="contentinfo">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-col">
+          <div class="brand-logo" style="margin-bottom: 12px;">
+            <div class="brand-icon-wrapper" style="width: 32px; height: 32px;">
+              <span class="material-symbols-rounded" style="font-size: 20px;">school</span>
+            </div>
+            <span style="font-weight: 700; font-size: 1.125rem;">EduRAG Merdeka</span>
+          </div>
+          <p style="font-size: 0.875rem; line-height: 1.6; margin-bottom: 16px;">
+            Platform AI pendidikan berbasis RAG untuk Kurikulum Merdeka. Membantu siswa memahami materi resmi dan menghemat waktu administratif guru.
+          </p>
+          <p style="font-size: 0.8125rem; color: var(--md-sys-color-outline);">
+            Dibuat dengan ❤️ di Surabaya untuk kemajuan pendidikan nasional.
+          </p>
+        </div>
+
+        <div class="footer-col">
+          <h4>Fitur</h4>
+          <ul>
+            <li><a href="#mode-peran">Mode Siswa</a></li>
+            <li><a href="#mode-peran">Mode Guru</a></li>
+            <li><a href="#fitur">Guardrail Anti-Halusinasi</a></li>
+            <li><a href="#demo-langsung">Playground Demo</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>Teknologi</h4>
+          <ul>
+            <li><a href="https://qdrant.tech" target="_blank" rel="noopener">Qdrant Vector DB</a></li>
+            <li><a href="https://cohere.com" target="_blank" rel="noopener">Cohere Embeddings</a></li>
+            <li><a href="https://fastapi.tiangolo.com" target="_blank" rel="noopener">FastAPI</a></li>
+            <li><a href="https://n8n.io" target="_blank" rel="noopener">n8n Workflow</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>Open Source</h4>
+          <ul>
+            <li><a href="https://github.com/indri007/eduragmerdeka" target="_blank" rel="noopener">Repositori GitHub</a></li>
+            <li><a href="https://github.com/indri007/eduragmerdeka/blob/main/LICENSE" target="_blank" rel="noopener">Lisensi Apache 2.0</a></li>
+            <li><a href="docs/PRD_EduRAG_Merdeka.md">Dokumentasi PRD</a></li>
+            <li><a href="https://github.com/indri007/eduragmerdeka/issues" target="_blank" rel="noopener">Laporkan Masalah</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <div>
+          &copy; 2026 EduRAG Merdeka. Terbuka di bawah lisensi Apache 2.0. Hak cipta materi buku tetap milik Kemendikbudristek RI.
+        </div>
+        <div style="display: flex; gap: 16px;">
+          <a href="https://github.com/indri007/eduragmerdeka">GitHub</a>
+          <span>•</span>
+          <a href="#faq">FAQ</a>
+          <span>•</span>
+          <a href="#quickstart">Dokumentasi</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Main JavaScript File -->
+  <script src="main.js" defer></script>
+</body>
+</html>
